@@ -83,24 +83,32 @@ export const useAuthStore = create((set, get) => ({
 
   connectSocket: () => {
     const { authUser, socket } = get();
-    if (!authUser || socket?.connected) return;
+
+    if (!authUser) return;
+    if (socket) return;
 
     const newSocket = io(BASE_URL, {
-        query: { userId: authUser._id },
-        withCredentials: true,
-    });
-
-    newSocket.connect();
-    set({ socket: newSocket });
-
-    newSocket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers : userIds });
+      query: { userId: authUser._id },
+      withCredentials: true,
     });
 
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
     });
+
+    newSocket.on("newMessage", (newMessage) => {
+      useChatStore.getState().handleIncomingMessage(newMessage);
+    });
+
+
+    newSocket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+
+    set({ socket: newSocket });
   },
+
+
 
   disconnectSocket: () => {
     const { socket } = get();

@@ -1,8 +1,5 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
-import {useAuthStore} from "./useAuthStore";
-import toast from "react-hot-toast";
-import { use } from "react";
 
 export const useChatStore = create((set, get) => ({
   users: [],
@@ -11,6 +8,7 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   isSending: false,
+  unreadCounts: {},
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -25,7 +23,14 @@ export const useChatStore = create((set, get) => ({
   },
 
   setSelectedUser: async (user) => {
-    set({ selectedUser: user, messages: [] });
+    set((state) => ({
+      selectedUser: user,
+      messages: [],
+      unreadCounts: {
+        ...state.unreadCounts,
+        [user._id]: 0,
+      },
+    }));
 
     try {
       const res = await axiosInstance.get(`/messages/${user._id}`);
@@ -55,22 +60,33 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  subscribeToNewMessages: () => {
-    const { selectedUser, messages } = get();
-    if(!selectedUser) return;
+  handleIncomingMessage: (newMessage) => {
+    const { selectedUser, unreadCounts, messages } = get();
 
-    const socket = useAuthStore.getState().socket;
-
-    socket.on("newMessage",(newMessage)=>{
-      if(newMessage.senderId !== selectedUser._id){
-        return;
-      }
-      set({ messages:[...get().messages, newMessage] });
-    });
+    if (selectedUser?._id === newMessage.senderId) {
+      set({
+        messages: [...messages, newMessage],
+      });
+    } else {
+      set({
+        unreadCounts: {
+          ...unreadCounts,
+          [newMessage.senderId]:
+            (unreadCounts[newMessage.senderId] || 0) + 1,
+        },
+      });
+    }
   },
 
-  unsubscribeFromNewMessages: () => {
-    const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
+  searchUser: async (email) => {
+    try {
+      const res = await axiosInstance.get(
+        `/messages/search?email=${email}`
+      );
+      return res.data;
+    } catch (error) {
+      console.log("Search error:", error);
+      return null;
+    }
   },
 }));

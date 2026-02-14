@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Image as ImageIcon } from "lucide-react";
 
 const MessageContainer = () => {
-  const { selectedUser, messages, sendMessage ,subscribeToNewMessages, unsubscribeFromNewMessages} = useChatStore();
+  const { selectedUser, messages, sendMessage } = useChatStore();
   const { authUser } = useAuthStore();
 
   const [text, setText] = useState("");
@@ -15,15 +15,6 @@ const MessageContainer = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    if (!selectedUser) return;
-
-    subscribeToNewMessages();
-
-    return () => unsubscribeFromNewMessages();
-  }, [selectedUser]);
-
 
   if (!selectedUser) {
     return (
