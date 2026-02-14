@@ -1,4 +1,4 @@
-# 🧠 REALTIME CHAT APP
+# 🧠 Linkup - A REALTIME CHAT APP
 
 A modern, realtime chat application built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js) and **Socket.IO** for seamless realtime messaging.  
 This project demonstrates a full-stack realtime messaging platform with authentication, online presence, unread message badges, profile management, and more — just like WhatsApp.
