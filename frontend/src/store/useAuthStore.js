@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useChatStore } from "./useChatStore";
+import { useCallStore } from "./useCallStore";
 
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
@@ -100,9 +101,22 @@ export const useAuthStore = create((set, get) => ({
       useChatStore.getState().handleIncomingMessage(newMessage);
     });
 
-
     newSocket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+
+    // WebRTC signaling events
+    newSocket.on("incomingCall", (data) => {
+      useCallStore.getState().handleIncomingCall(data);
+    });
+    newSocket.on("callAccepted", (signal) => {
+      useCallStore.getState().handleCallAccepted(signal);
+    });
+    newSocket.on("iceCandidate", (candidate) => {
+      useCallStore.getState().handleIceCandidate(candidate);
+    });
+    newSocket.on("callEnded", () => {
+      useCallStore.getState().endCallLocal();
     });
 
     set({ socket: newSocket });

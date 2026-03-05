@@ -1,7 +1,8 @@
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState, useRef, useEffect } from "react";
-import { Send, Image as ImageIcon } from "lucide-react";
+import { Send, Image as ImageIcon, Phone, Video } from "lucide-react";
+import { useCallStore } from "../store/useCallStore";
 
 const MessageContainer = () => {
   const { selectedUser, messages, sendMessage } = useChatStore();
@@ -10,6 +11,8 @@ const MessageContainer = () => {
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const bottomRef = useRef(null);
+
+  const { startCall } = useCallStore();
 
   // auto scroll to bottom
   useEffect(() => {
@@ -58,15 +61,34 @@ const MessageContainer = () => {
     <div className="flex-1 flex flex-col bg-base-100 text-base-content h-full overflow-hidden">
 
       {/* HEADER */}
-      <div className="px-6 py-4 border-b border-base-300 flex items-center gap-3 bg-base-200">
-        <img
-          src={selectedAvatar}
-          alt="avatar"
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div>
-          <h2 className="font-semibold">{selectedUser.fullName}</h2>
-          <p className="text-xs opacity-60">Online</p>
+      <div className="px-6 py-4 border-b border-base-300 flex items-center justify-between bg-base-200">
+        <div className="flex items-center gap-3">
+          <img
+            src={selectedAvatar}
+            alt="avatar"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <h2 className="font-semibold">{selectedUser.fullName}</h2>
+            <p className="text-xs opacity-60">Online</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => startCall(selectedUser, false)}
+            className="btn btn-circle btn-ghost btn-sm text-primary"
+            title="Audio Call"
+          >
+            <Phone size={20} />
+          </button>
+          <button
+            onClick={() => startCall(selectedUser, true)}
+            className="btn btn-circle btn-ghost btn-sm text-primary"
+            title="Video Call"
+          >
+            <Video size={20} />
+          </button>
         </div>
       </div>
 
@@ -107,11 +129,10 @@ const MessageContainer = () => {
                 {msg.text && (
                   <div
                     className={`px-4 py-2 rounded-2xl text-sm break-words
-                    ${
-                      isMe
+                    ${isMe
                         ? "bg-primary text-primary-content rounded-br-none"
                         : "bg-base-300 rounded-bl-none"
-                    }`}
+                      }`}
                   >
                     {msg.text}
                   </div>
