@@ -2,7 +2,7 @@
 
 <br />
 
-# 💬 ChatSphere
+# 💬 Linkup
 
 ### *A Real-Time Full-Stack Chat Application with Audio & Video Calls*
 
